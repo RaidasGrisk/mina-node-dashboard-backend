@@ -91,12 +91,13 @@ app.get('/active_snark_workers', async (req, res) => {
   let response = await fetch(url, { method: 'GET' })
   response = await response.json()
   const last_block = response.blockchainLength
+  const look_back_blocks = 2500
 
   const query = `
     SELECT distinct prover, MIN(blockheight) as blockheight
     FROM \`minaexplorer.archive.snarks\`
     WHERE canonical = true
-    AND blockheight >= ${last_block} - 2500
+    AND blockheight >= ${last_block - look_back_blocks}
     GROUP BY prover
     ORDER BY blockheight ASC
   `
@@ -115,17 +116,17 @@ app.get('/active_snark_workers', async (req, res) => {
     // first lets create an array starting from oldest block
     // and ending at newest, incrementing by 1
     const unique_blocks = new Set(rows.map(item => item.blockheight))
-    const start = Math.min(...unique_blocks)
-    const stop = Math.max(...unique_blocks)
-    const step = 1
     const range = (start, stop, step) => {
       return Array.from({
         length: (stop - start) / step + 1
       }, (_, i) => start + (i * step))
     }
+    const start = last_block - look_back_blocks
+    const stop = last_block
+    const step = 1
     blocks = range(start, stop, step)
 
-    // lets add the accumulated number of scnarks to each block
+    // lets add the accumulated number of snarks to each block
     const snark_counts = []
     let accum = 0
     blocks.forEach(block => {
