@@ -38,7 +38,7 @@ app.get('/test', async (req, res) => {
 app.get('/all_time_validators', async (req, res) => {
 
   // use cache
-  cache_key = 'all_time_validators'
+  const cache_key = 'all_time_validators'
   const data = myCache.get(cache_key)
   if (data) { return res.json(data) }
 
@@ -81,7 +81,7 @@ app.get('/all_time_validators', async (req, res) => {
 app.get('/active_snark_workers', async (req, res) => {
 
   // use cache
-  cache_key = 'active_snark_workers'
+  const cache_key = 'active_snark_workers'
   const data = myCache.get(cache_key)
   if (data) { return res.json(data) }
 
