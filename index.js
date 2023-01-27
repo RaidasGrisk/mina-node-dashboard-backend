@@ -1,5 +1,6 @@
 require('dotenv').config()
 const express = require('express')
+const cors = require('cors')
 const NodeCache = require("node-cache")
 const { BigQuery } = require('@google-cloud/bigquery')
 
@@ -10,6 +11,7 @@ const bigquery = new BigQuery({
 
 const app = express()
 const myCache = new NodeCache({ stdTTL: 86400 })
+app.use(cors({ origin: '*' }))
 
 app.get('/test', async (req, res) => {
 
@@ -42,7 +44,7 @@ app.get('/all_time_validators', async (req, res) => {
 
   // pull fresh data
   const query = `
-    SELECT epoch, COUNT(creator)
+    SELECT epoch, COUNT(creator) as validator
     FROM (
       SELECT distinct creator, MIN(protocolstate.consensusstate.epoch) as epoch
       FROM \`minaexplorer.archive.blocks\`
@@ -57,7 +59,17 @@ app.get('/all_time_validators', async (req, res) => {
   }
 
   try {
-    const [rows] = await bigquery.query(options)
+    let [rows] = await bigquery.query(options)
+
+    // accumulate validators
+    rows = rows.map((item, index, array) => {
+      return {
+        epoch: item.epoch + 1, // make the epoch start at 1 not 0
+        validator: array.slice(0, index).reduce(
+          (accum, item_) => accum + item_.validator, item.validator)
+      }
+    })
+
     myCache.set(cache_key, rows)
     res.json(rows)
   } catch (err) {
