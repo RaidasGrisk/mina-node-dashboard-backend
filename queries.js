@@ -66,7 +66,6 @@ const get_all_time_validators = async (req, res) => {
   let response = await fetch(url, { method: 'GET' })
   response = await response.json()
   const last_epoch = response.epoch
-  console.log(rows.slice(-1)[0].epoch, last_epoch)
   while (rows.slice(-1)[0].epoch < last_epoch) {
     let epoch = rows.slice(-1)[0].epoch + 1
     let validator = rows.slice(-1)[0].validator
@@ -87,7 +86,7 @@ const get_active_snark_workers = async (req, res) => {
   let response = await fetch(url, { method: 'GET' })
   response = await response.json()
   const last_block = response.blockchainLength
-  const look_back_blocks = 2500
+  const look_back_blocks = 5000
 
   const query = `
     SELECT distinct prover, MIN(blockheight) as blockheight
@@ -105,7 +104,6 @@ const get_active_snark_workers = async (req, res) => {
 
   let rows = await bigquery.query(options)
   rows = rows[0]
-  console.log(rows)
 
   // refactor the data so that we've got the following:
   // { blockheight: int, snark_workers: int }
@@ -123,7 +121,6 @@ const get_active_snark_workers = async (req, res) => {
   const stop = last_block
   const step = 1
   blocks = range(start, stop, step)
-  console.log(blocks)
 
   // lets add the accumulated number of snarks to each block
   const snark_counts = []
