@@ -11,6 +11,7 @@ WORKDIR /app
 COPY package.json .
 RUN npm i
 COPY index.js .
+COPY queries.js .
 COPY .env .
 COPY key.json .
 
