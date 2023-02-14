@@ -1,6 +1,8 @@
 require('dotenv').config()
 const { BigQuery } = require('@google-cloud/bigquery')
 
+// to make BigQuery requests GCP credentials are required:
+// key.json and projectId. Both stored in root dir.
 const bigquery = new BigQuery({
   keyFilename: 'key.json',
   projectId: process.env.projectName,
