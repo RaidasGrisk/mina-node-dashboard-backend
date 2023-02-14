@@ -56,23 +56,32 @@ const get_all_time_validators = async (req, res) => {
   })
 
   // there's an unforch innacuracy in the query which might result in
-  // missing last epoch data if there's still no new (i.e distinct address)
-  // validators in the latest epoch.
-  //
-  // So, before returning the data, we've to check if the query did not
-  // return the last epoch data and if that is the case, then add this
-  // data manually.
+  // missing some epoch data if there was no unique validators in it.
+
+  // in case we are missing the last epoch data,
+  // make sure we know the number of the last epoch
   const url = 'https://api.minaexplorer.com/summary'
   let response = await fetch(url, { method: 'GET' })
   response = await response.json()
   const last_epoch = response.epoch
-  while (rows.slice(-1)[0].epoch < last_epoch) {
-    let epoch = rows.slice(-1)[0].epoch + 1
-    let validator = rows.slice(-1)[0].validator
-    rows.push({
-      'epoch': epoch,
-      'validator': validator
-    })
+
+  // iterate over each epoch and check if epoch is missing
+  for (let epoch = 1; epoch <= last_epoch; epoch++) {
+    epoch_idx = epoch - 1
+    if (rows[epoch_idx].epoch == epoch) { // not missing
+      continue
+    } else { // is missing
+      let missing_epoch = {
+        'epoch': epoch,
+        'validator': rows[epoch_idx - 1].validator
+      }
+      // insert epoch at specified idx
+      rows = [
+        ...rows.slice(0, epoch_idx),
+        missing_epoch,
+        ...rows.slice(epoch_idx)
+      ]
+    }
   }
 
   return rows
