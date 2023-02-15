@@ -51,7 +51,7 @@ const get_all_time_validators = async (req, res) => {
   // accumulate validators
   rows = rows.map((item, index, array) => {
     return {
-      epoch: item.epoch + 1, // make the epoch start at 1 not 0
+      epoch: item.epoch,
       validator: array.slice(0, index).reduce(
         (accum, item_) => accum + item_.validator, item.validator)
     }
@@ -68,8 +68,8 @@ const get_all_time_validators = async (req, res) => {
   const last_epoch = response.epoch
 
   // iterate over each epoch and check if epoch is missing
-  for (let epoch = 1; epoch <= last_epoch; epoch++) {
-    epoch_idx = epoch - 1
+  for (let epoch = 0; epoch <= last_epoch; epoch++) {
+    let epoch_idx = epoch
     if (rows[epoch_idx].epoch == epoch) { // not missing
       continue
     } else { // is missing
