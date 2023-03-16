@@ -70,7 +70,7 @@ const get_all_time_validators = async (req, res) => {
   // iterate over each epoch and check if epoch is missing
   for (let epoch = 0; epoch <= last_epoch; epoch++) {
     let epoch_idx = epoch
-    if (rows[epoch_idx].epoch == epoch) { // not missing
+    if (rows[epoch_idx]?.epoch == epoch) { // not missing
       continue
     } else { // is missing
       let missing_epoch = {
